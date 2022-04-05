@@ -8,6 +8,8 @@ to mix legacy FSK 1200bps with new Lora technology.
 The current application is to run the KISS TNC together with the APRS digi [APRX](https://github.com/PhirePhly/aprx), which connects via "KISS over TCP" and provides
 powerful APRS digipeating and I-gate functionality for LoRa-APRS.
 
+The Software keeps the compatibility with both standard AX25 packets and Austrian team packet style (called "OE_style").
+
 ## Hardware compatibility
 
 The LoRa KISS TNC runs on Raspberry Pi 2 or newer together with the SX126x LoRa Module.
