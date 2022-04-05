@@ -1,3 +1,4 @@
+![RPi-LoRa-KISS-TNC-2ndgen](/doc/images/LoRa_RPi_Companion_2.jpeg)
 # Raspberry Pi LoRa KISS TNC
 
 This project emulates a KISS TNC and controls a hardware LoRa transceiver 2nd generation (SX126x)
