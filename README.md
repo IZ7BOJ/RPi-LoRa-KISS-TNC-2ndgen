@@ -25,10 +25,13 @@ Note that the GPIO mapping of the PCB is different from the one reported below! 
 
 ### Wiring Connections
 
-Power pins, SPI pins, `RESET`, and `BUSY` pins must be connected between RPi and LoRa module.
+Power pins, SPI pins, `RESET`, `BUSY`, IRQ, TXEN, RXEN pins must be connected between RPi and LoRa module.
+The default SPI port is using bus id 0 and cs id 0. 
+DIO1 must be connected because is used as RX IRQ. 
+TXEN and RXEN must be connected because are used to manage the RX/TX switch of the module
+The pins declared in the default config.py are as follows, but can be modified as you prefer
 
-The default SPI port is using bus id 0 and cs id 0. The default GPIO pins used for connecting to SX126x with Broadcom pin numbering are as follows.
-Note: DIO1 must be connected because is used as RX IRQ
+Note: The  GPIO pins are declared with Broadcom pin numbering, they does not indicate the position on the physical connector! To see the correspondance between them, see: https://pinout.xyz/ 
 
 | Semtech SX126x | Raspberry Pi |
 | :------------: | :------:|
@@ -41,8 +44,8 @@ Note: DIO1 must be connected because is used as RX IRQ
 | RESET | GPIO 22 |
 | BUSY | GPIO 23|
 | DIO1 | GPIO 26 |
-| TXEN | -1 (unused) |
-| RXEN | -1 (unused) |
+| TXEN | GPIO 5 |
+| RXEN | GPIO 25 |
 
 ## Installation
 
