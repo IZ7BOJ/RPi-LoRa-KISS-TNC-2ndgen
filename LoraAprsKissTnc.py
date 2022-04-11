@@ -135,7 +135,7 @@ class LoraAprsKissTnc(SX126x): #Inheritance of SX126x class
                                 data = self.LORA_APRS_HEADER + data
                                 logf("\033[94mLoRa TX OE Syle packet: \033[0m" + repr(data))
                             else:
-                                logf("\033[95mLoRa TX Standard AX25 packet: \933[0m" + repr(data))
+                                logf("\033[95mLoRa TX Standard AX25 packet: \033[0m" + repr(data))
                             self.transmit(data)
                         except QueueEmpty:
                             pass
