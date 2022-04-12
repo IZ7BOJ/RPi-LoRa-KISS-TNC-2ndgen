@@ -65,6 +65,7 @@ class KissServer(Thread):
                     parser.parse(data)
                 else:
                     self.connection.close()
+                    logf("KISS-Server: Closed Connection from %s" % client_address[0])
                     break
 
     def queue_frame(self, frame, verbose=True):
