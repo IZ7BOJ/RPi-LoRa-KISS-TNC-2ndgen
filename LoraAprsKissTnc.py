@@ -115,9 +115,7 @@ class LoraAprsKissTnc(SX126x): #Inheritance of SX126x class
 
       if self.server:
             if self.appendSignalReport:
-                # Signal report only for certain frames, not messages!
-                if self.aprs_data_type(payload) in self.DATA_TYPES_POSITION:
-                    payload += b" RSSI=%idBm SNR=%idB" % (rssi, snr)
+                payload += b" RSSI=%idBm SNR=%idB" % (rssi, snr)
             self.server.send(payload)
 
     def startListening(self):
