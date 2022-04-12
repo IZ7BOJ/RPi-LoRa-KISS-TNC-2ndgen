@@ -96,7 +96,7 @@ class LoraAprsKissTnc(SX126x): #Inheritance of SX126x class
     def callback(self) :
 
       payload = [] #put received data into list of integers
-      while self.available() > 1 :
+      while self.available() >= 1 :
           payload.append(self.read())
 
       payload=bytes(payload) #int-->bytes
