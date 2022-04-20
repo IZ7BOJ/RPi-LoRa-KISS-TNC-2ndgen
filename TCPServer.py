@@ -1,4 +1,3 @@
-
 #!/usr/bin/python3
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -64,8 +63,8 @@ class KissServer(Thread):
                 if data:
                     parser.parse(data)
                 else:
-                    self.connection.close()
                     logf("KISS-Server: Closed Connection from %s" % client_address[0])
+                    self.connection.close()
                     break
 
     def queue_frame(self, frame, verbose=True):
@@ -81,7 +80,7 @@ class KissServer(Thread):
     def __del__(self):
         self.socket.shutdown()
 
-    def send(self, data):
+    def send(self, data,signalreport):
         global peer
         LORA_APRS_HEADER = b"<\xff\x01"
         # remove LoRa-APRS header if present
@@ -89,7 +88,7 @@ class KissServer(Thread):
             data = data[len(LORA_APRS_HEADER):]
             logf("\033[95mOE_Style header found!\033[0m")
             try:
-                encoded_data = KissHelper.encode_kiss_OE(data)
+                encoded_data = KissHelper.encode_kiss_OE(data,signalreport)
             except Exception as e:
                 logf("KISS encoding went wrong (exception while parsing)")
                 traceback.print_tb(e.__traceback__)
@@ -97,7 +96,7 @@ class KissServer(Thread):
         else:
             logf("\033[94mNo OE_Style header found, trying standard AX25 decoding...\033[0m")
             try:
-                encoded_data = KissHelper.encode_kiss_AX25(data)
+                encoded_data = KissHelper.encode_kiss_AX25(data,signalreport)
             except Exception as e:
                 logf("KISS encoding went wrong (exception while parsing)")
                 traceback.print_tb(e.__traceback__)
@@ -125,7 +124,7 @@ if __name__ == '__main__':
     server.setDaemon(True)
     server.start()
 
-    #server.send(b"\xc0\x00\x82\xa0\xa4\xa6@@`\x9e\x8ar\xa8\x96\x90q\x03\xf0!4725.51N/00939.86E[322/002/A=001306 Batt=3.99V\xc0",{"level":0, "snr":0})
-    server.send(b'<\xff\x01IZ7BOJ-12>APRS::OE1ACM-29: No GPS-Fix  Batt=0.00V {19')
+    #server.send(b"\xc0\x00\x82\xa0\xa4\xa6@@`\x9e\x8ar\xa8\x96\x90q\x03\xf0!4725.51N/00939.86E[322/002/A=001306 Batt=3.99V\xc0",{"level":0, "snr":0},'Level:-115dBm, SNR:0dB')
+    server.send(b'<\xff\x01IZ7BOJ-12>APRS::OE1ACM-29: No GPS-Fix  Batt=0.00V {19','Level:-115dBm, SNR:0dB')
     data = KissQueue.get()
     print("Received KISS frame:" + repr(data))
