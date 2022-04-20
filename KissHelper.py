@@ -24,8 +24,8 @@
 # * Sending a raw AX.25 frame with Python
 #   https://thomask.sdf.org/blog/2018/12/15/sending-raw-ax25-python.html
 #
-#   KISS-TNC for LoRa radio modem 
-#   https://github.com/tomelec/RPi-LoRa-KISS-TNC
+#   KISS-TNC for LoRa radio modem
+#   https://github.com/IZ7BOJ/RPi-LoRa-KISS-TNC
 
 import struct
 import datetime
@@ -35,6 +35,11 @@ KISS_FEND = 0xC0  # Frame start/end marker
 KISS_FESC = 0xDB  # Escape character
 KISS_TFEND = 0xDC  # If after an escape, means there was an 0xC0 in the source message
 KISS_TFESC = 0xDD  # If after an escape, means there was an 0xDB in the source message
+
+# APRS data types
+DATA_TYPES_POSITION = b"!'/@`"
+DATA_TYPE_MESSAGE = b":"
+DATA_TYPE_THIRD_PARTY = b"}"
 
 def logf(message):
     timestamp = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S - ')
@@ -70,17 +75,14 @@ def decode_address(data, cursor):
         call = addr
     return (call, hrr, ext)
 
-
-def encode_kiss_AX25(frame): #from Lora to Kiss, Standard AX25
-    packet=frame #no manipulation needed in case of ax25 packets
-    
+def ax25parser(frame): #extracts fields from ax25 frames and add signal report do payload, if specified
     pos = 0
-    
+
     # DST
     (dest_addr, dest_hrr, dest_ext) = decode_address(frame, pos)
     pos += 7
     #print("DST: ", dest_addr)
-    
+
     # SRC
     (src_addr, src_hrr, src_ext) = decode_address(frame, pos)
     pos += 7
@@ -88,13 +90,14 @@ def encode_kiss_AX25(frame): #from Lora to Kiss, Standard AX25
 
     # REPEATERS
     ext = src_ext
+    rpt_list = b""
     while ext == 0:
         rpt_addr, rpt_hrr, ext = decode_address(frame, pos)
+        rpt_list += b","+rpt_addr
         #print("RPT: ", rpt_addr)
         pos += 7
-    
+
     # CTRL
-    
     ctrl = frame[pos]
     pos += 1
     if (ctrl & 0x3) == 0x3:
@@ -102,23 +105,31 @@ def encode_kiss_AX25(frame): #from Lora to Kiss, Standard AX25
         pid = frame[pos]
         #print("PID: "+str(pid))
         pos += 1
-
     elif (ctrl & 0x3) == 0x1:
         # decode_sframe(ctrl, frame, pos)
-        #print("SFRAME")
+        logf("SFRAME")
         return None
     elif (ctrl & 0x1) == 0x0:
         # decode_iframe(ctrl, frame, pos)
-        #print("IFRAME")
+        logf("IFRAME")
         return None
+    payload=frame[pos:]
+    dti=payload[0]
+    logf("Extracted AX25 parameters from AX25 Frame")
+    logf("From: "+repr(src_addr)[2:-1]+" To: "+repr(dest_addr)[2:-1]+" Via: "+repr(rpt_list)[3:-1]+" PID: "+str(hex(pid))+" Payload: "+str(payload)[str(payload).find("'"):-1])
 
-    logf("Extracted AX25 parameters from AX25 LoRa Frame")
-    logf("From: "+repr(src_addr)[2:-1]+" To: "+repr(dest_addr)[2:-1]+" Payload: "+repr(frame[pos:]))
+    return src_addr,dest_addr,rpt_list,payload, dti
 
+def encode_kiss_AX25(frame,signalreport): #from Lora to Kiss, Standard AX25
+
+    src_addr,dest_addr,rpt_list,payload,dti=ax25parser(frame) #only for logging
 
     # Escape the packet in case either KISS_FEND or KISS_FESC ended up in our stream
+    if config.appendSignalReport and str(dti) != DATA_TYPE_MESSAGE:
+        frame += b" "+str.encode(signalreport,'utf-8')
+
     packet_escaped = []
-    for x in packet:
+    for x in frame:
         if x == KISS_FEND:
             packet_escaped += [KISS_FESC, KISS_TFEND]
         elif x == KISS_FESC:
@@ -126,9 +137,10 @@ def encode_kiss_AX25(frame): #from Lora to Kiss, Standard AX25
         else:
             packet_escaped += [x]
 
-    # Build the frame that we will send via Kiss and turn it into a string
+    # Build the frame that we will send to aprx and turn it into a string
     kiss_cmd = 0x00  # Two nybbles combined - TNC 0, command 0 (send data)
     kiss_frame = [KISS_FEND, kiss_cmd] + packet_escaped + [KISS_FEND]
+
     try:
         output = bytearray(kiss_frame)
     except ValueError:
@@ -136,11 +148,14 @@ def encode_kiss_AX25(frame): #from Lora to Kiss, Standard AX25
         return None
     return output
 
-def encode_kiss_OE(frame): #from Lora to Kiss, OE_Style
+def encode_kiss_OE(frame,signalreport): #from Lora to Kiss, OE_Style
     # Ugly frame disassembling
     if not b":" in frame:
+        logf("Can't decode OE LoRa Frame")
         return None
     path = frame.split(b":")[0]
+    payload = frame[frame.find(b":")+1:]
+    dti = payload[0]
     src_addr = path.split(b">")[0]
     digis = path[path.find(b">") + 1:].split(b",")
     dest_addr = digis.pop(0)
@@ -159,8 +174,10 @@ def encode_kiss_OE(frame): #from Lora to Kiss, OE_Style
     packet += [0xF0]  # No protocol
     # information field
     logf("Extracted AX25 parameters from OE LoRa Frame")
-    logf("From: "+repr(src_addr)[2:-1]+" To: "+repr(dest_addr)[2:-1]+" Payload: "+repr(frame[frame.find(b":") + 1:]))
-    packet += frame[frame.find(b":") + 1:]
+    logf("From: "+repr(src_addr)[2:-1]+" To: "+repr(dest_addr)[2:-1]+" Via: "+str(digis)[1:-1].replace("b","").replace("'","")+" Payload: "+repr(payload)[2:-1])
+    packet += payload
+    if config.appendSignalReport and str(dti) != DATA_TYPE_MESSAGE:
+        packet += b" "+str.encode(signalreport,'utf-8')
 
     # Escape the packet in case either KISS_FEND or KISS_FESC ended up in our stream
     packet_escaped = []
@@ -183,103 +200,27 @@ def encode_kiss_OE(frame): #from Lora to Kiss, OE_Style
     return output
 
 def decode_kiss_OE(frame): #From Kiss to LoRa, OE_Style
-    result = b""
-    pos = 0
-    if frame[pos] != 0xC0 or frame[len(frame) - 1] != 0xC0:
-        print(frame[pos], frame[len(frame) - 1])
+
+    if frame[0] != 0xC0 or frame[len(frame) - 1] != 0xC0:
+        logf("Kiss Header not found, abort decoding of Frame: "+repr(frame))
         return None
-    pos += 1
-    pos += 1
+    frame=frame[2:len(frame) - 1] #cut kiss delimitator 0xc0 and command 0x00
 
-    # DST
-    (dest_addr, dest_hrr, dest_ext) = decode_address(frame, pos)
-    pos += 7
-    #print("DST: ", dest_addr)
+    src_addr,dest_addr,rpt_list,payload,dti=ax25parser(frame) #only for logging
 
-    # SRC
-    (src_addr, src_hrr, src_ext) = decode_address(frame, pos)
-    pos += 7
-    #print("SRC: ", src_addr)
-
-    result += src_addr.strip()
-    # print(type(result), type(dest_addr.strip()))
-    result += b">" + dest_addr.strip()
-
-    # REPEATERS
-    ext = src_ext
-    while ext == 0:
-        rpt_addr, rpt_hrr, ext = decode_address(frame, pos)
-        #print("RPT: ", rpt_addr)
-        pos += 7
-        result += b"," + rpt_addr.strip()
-
-    result += b":"
-
-    # CTRL
-    # (ctrl,) = struct.unpack("<B", frame[pos])
-    ctrl = frame[pos]
-    pos += 1
-    if (ctrl & 0x3) == 0x3:
-        #(pid,) = struct.unpack("<B", frame[pos])
-        pid = frame[pos]
-        # print("PID="+str(pid))
-        pos += 1
-        logf("Decapsulating KISS Frame and extracting ax25 fields...")
-        logf("From: "+repr(src_addr)[2:-1]+" To: "+repr(dest_addr)[2:-1]+" Via: "+repr(rpt_addr)[2:-1]+" Payload: "+repr(frame[pos:len(frame) - 1]))
-        result += frame[pos:len(frame) - 1]
-    elif (ctrl & 0x3) == 0x1:
-        # decode_sframe(ctrl, frame, pos)
-        print("SFRAME")
-        return None
-    elif (ctrl & 0x1) == 0x0:
-        # decode_iframe(ctrl, frame, pos)
-        print("IFRAME")
-        return None
-
+    #build OE_style frame piece by piece
+    result = src_addr.strip()+b">"+dest_addr.strip()+rpt_list+b":"+payload
     return result
 
 def decode_kiss_AX25(frame): #from kiss to LoRA, Standard AX25
     result = b""
-    pos = 0
-    if frame[pos] != 0xC0 or frame[len(frame) - 1] != 0xC0:
-        print(frame[pos], frame[len(frame) - 1])
+
+    if frame[0] != 0xC0 or frame[len(frame) - 1] != 0xC0:
+        logf("Kiss Header not found, abort decoding of Frame: "+repr(frame))
         return None
-    pos += 1
-    pos += 1
+    frame=frame[2:len(frame) - 1] #cut kiss delimitator 0xc0 and command 0x00
 
-    # DST
-    (dest_addr, dest_hrr, dest_ext) = decode_address(frame, pos)
-    pos += 7
-    print("DST: ", dest_addr)
-
-    # SRC
-    (src_addr, src_hrr, src_ext) = decode_address(frame, pos)
-    pos += 7
-    print("SRC: ", src_addr)
-
-    # REPEATERS
-    ext = src_ext
-    while ext == 0:
-        rpt_addr, rpt_hrr, ext = decode_address(frame, pos)
-        print("RPT: ", rpt_addr)
-        pos += 7
-
-    ctrl = frame[pos]
-    pos += 1
-    if (ctrl & 0x3) == 0x3:
-        #(pid,) = struct.unpack("<B", frame[pos])
-        pid = frame[pos]
-        print("PID="+str(pid))
-        pos += 1
-
-    elif (ctrl & 0x3) == 0x1:
-        # decode_sframe(ctrl, frame, pos)
-        print("SFRAME")
-        return None
-    elif (ctrl & 0x1) == 0x0:
-        # decode_iframe(ctrl, frame, pos)
-        print("IFRAME")
-        return None
+    src_addr,dest_addr,rpt_list,payload,dti=ax25parser(frame) #only for logging
 
     result = frame[2:len(frame) - 1] #Cut FEND and COMMAND bytes form kiss frame and transmit as is to RF
     return result
@@ -325,10 +266,19 @@ class SerialParser():
 if __name__ == "__main__":
     # Playground for testing
 
-    #test decode
-    kissframe = b"\xc0\x00\x82\xa0\xa4\xa6@@`\x9e\x8ar\xa8\x96\x90q\x03\xf0!4725.51N/00939.86E[322/002/A=001306 Batt=3.99V\xc0"
+    kissframe = b"\xc0\x00\x82\xa0\xa4\xa6@@`\x9e\x8ar\xa8\x96\x90p\x88\x92\x8e\x92@@f\x88\x92\x8e\x92@@e\x03\xf0!4725.51N/00939.86E[322/002/A=001306 Batt=3.99V\xc0"
+
+    #test decode KISS->OE
     print(decode_kiss_OE(kissframe))
 
-    #test encode
+    #test decode KISS->AX25
+    print(decode_kiss_AX25(kissframe))
+
+    #test encode OE->KISS
     OE_frame = b"OE9TKH-8>APRS,digi-3,digi-2:!4725.51N/00939.86E[322/002/A=001306 Batt=3.99V"
-    print(encode_kiss_OE(OE_frame))
+    signalreport="Level:-115dBm, SNR:0dB"
+    print(encode_kiss_OE(OE_frame,signalreport))
+
+    #test encode AX25->KISS
+    ax25_frame = b"\x82\xa0\xa4\xa6@@`\x9e\x8ar\xa8\x96\x90p\x88\x92\x8e\x92@@f\x88\x92\x8e\x92@@e\x03\xf0!4725.51N/00939.86E[322/002/A=001306 Batt=3.99V"
+    print(encode_kiss_AX25(ax25_frame,signalreport))
