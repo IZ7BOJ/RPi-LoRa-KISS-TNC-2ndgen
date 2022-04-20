@@ -67,6 +67,7 @@ class LoraAprsKissTnc(SX126x): #Inheritance of SX126x class
         # Configure LoRa to use TCXO with DIO3 as control
         self.setDio3TcxoCtrl(self.DIO3_OUTPUT_1_8, self.TCXO_DELAY_10)
 
+        # Configure Frequency
         self.setFrequency(frequency)
 
         # Set RX gain. RX gain option are power saving gain or boosted gain
@@ -96,7 +97,7 @@ class LoraAprsKissTnc(SX126x): #Inheritance of SX126x class
     def callback(self) :
 
       payload = [] #put received data into list of integers
-      while self.available() >= 1 :
+      while self.available() > 1 :
           payload.append(self.read())
 
       payload=bytes(payload) #int-->bytes
@@ -105,18 +106,16 @@ class LoraAprsKissTnc(SX126x): #Inheritance of SX126x class
             return
       rssi = self.packetRssi()
       snr = self.snr()
-
+      signalreport = "Level:"+str(rssi)+" dBm, SNR:"+str(snr)+"dB"
       logf("LoRa RX[RSSI=%idBm, SNR=%idB, %iBytes]: %s" %(rssi, snr, len(payload), repr(payload)))
 
       # Show received status in case CRC or header error occur
       status = self.status()
-      if status == self.STATUS_CRC_ERR : print("CRC error")
-      if status == self.STATUS_HEADER_ERR : print("Packet header error")
+      if status == self.STATUS_CRC_ERR : logf("CRC error")
+      if status == self.STATUS_HEADER_ERR : logf("Packet header error")
 
       if self.server:
-            if self.appendSignalReport:
-                payload += b" RSSI=%idBm SNR=%idB" % (rssi, snr)
-            self.server.send(payload)
+            self.server.send(payload,signalreport)
 
     def startListening(self):
         try:
@@ -126,12 +125,12 @@ class LoraAprsKissTnc(SX126x): #Inheritance of SX126x class
                     if not self.queue.empty():
                         try:
                             data = self.queue.get(block=False)
-                            if self.aprs_data_type(data) == self.DATA_TYPE_THIRD_PARTY:
-                                # remove third party thing
-                                data = data[data.find(self.DATA_TYPE_THIRD_PARTY) + 1:]
                             if config.TX_OE_Style:
-                                data = self.LORA_APRS_HEADER + data
-                                logf("\033[94mLoRa TX OE Syle packet: \033[0m" + repr(data))
+                               if self.aprs_data_type(data) == self.DATA_TYPE_THIRD_PARTY:
+                                   # remove third party thing in case of OE_Style tx
+                                   data = data[data.find(self.DATA_TYPE_THIRD_PARTY) + 1:]
+                               data = self.LORA_APRS_HEADER + data
+                               logf("\033[94mLoRa TX OE Syle packet: \033[0m" + repr(data))
                             else:
                                 logf("\033[95mLoRa TX Standard AX25 packet: \033[0m" + repr(data))
                             self.transmit(data)
@@ -140,7 +139,7 @@ class LoraAprsKissTnc(SX126x): #Inheritance of SX126x class
                 time.sleep(0.50)
         except KeyboardInterrupt:
             #BOARD.teardown()
-            print("exit")
+            logf("Keyboard Interrupt received. Exiting...")
 
     def transmit(self, data):
 
@@ -156,6 +155,6 @@ class LoraAprsKissTnc(SX126x): #Inheritance of SX126x class
     def aprs_data_type(self, lora_aprs_frame):
         delimiter_position = lora_aprs_frame.find(b":")
         try:
-            return lora_aprs_frame[delimiter_position + 1]
+            return bytes([lora_aprs_frame[delimiter_position + 1]])
         except IndexError:
             return ""
