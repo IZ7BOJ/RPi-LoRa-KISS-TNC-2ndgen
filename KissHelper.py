@@ -222,8 +222,7 @@ def decode_kiss_AX25(frame): #from kiss to LoRA, Standard AX25
 
     src_addr,dest_addr,rpt_list,payload,dti=ax25parser(frame) #only for logging
 
-    result = frame[2:len(frame) - 1] #Cut FEND and COMMAND bytes form kiss frame and transmit as is to RF
-    return result
+    return frame
 
 
 class SerialParser():
