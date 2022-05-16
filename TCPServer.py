@@ -26,9 +26,9 @@ def logf(message):
     timestamp = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S - ')
     if config.log_enable:
        fileLog = open(config.logpath,"a")
-       fileLog.write(timestamp + message+"\r")
+       fileLog.write(timestamp + message+"\n")
        fileLog.close()
-    print(timestamp + message+"\r")
+    print(timestamp + message+"\n")
 
 client_address = []
 RECV_BUFFER_LENGTH = 1024
