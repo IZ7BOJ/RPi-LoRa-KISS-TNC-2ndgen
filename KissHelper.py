@@ -45,9 +45,9 @@ def logf(message):
     timestamp = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S - ')
     if config.log_enable:
        fileLog = open(config.logpath,"a")
-       fileLog.write(timestamp + message+"\r")
+       fileLog.write(timestamp + message+"\n")
        fileLog.close()
-    print(timestamp + message+"\r")
+    print(timestamp + message+"\n")
 
 # Addresses must be 6 bytes plus the SSID byte, each character shifted left by 1
 # If it's the final address in the header, set the low bit to 1
