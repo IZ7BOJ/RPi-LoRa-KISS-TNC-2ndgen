@@ -33,9 +33,9 @@ def logf(message):
     timestamp = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S - ')
     if config.log_enable:
        fileLog = open(config.logpath,"a")
-       fileLog.write(timestamp + message+"\r")
+       fileLog.write(timestamp + message+"\n")
        fileLog.close()
-    print(timestamp + message+"\r")
+    print(timestamp + message+"\n")
 
 class LoraAprsKissTnc(SX126x): #Inheritance of SX126x class
     LORA_APRS_HEADER = b"<\xff\x01"
