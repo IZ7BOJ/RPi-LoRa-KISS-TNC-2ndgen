@@ -86,6 +86,9 @@ class LoraAprsKissTnc(SX126x): #Inheritance of SX126x class
         self.setLoRaPacket(self.HEADER_EXPLICIT, preamble, payloadLength, crcType)
 
         self.setSyncWord(sync_word)
+        
+        #Set OCP to 140mA
+        self.setCurrentProtection(0x38)
 
         # Set TX power, default power for SX1262 and SX1268 are +22 dBm and for SX1261 is +14 dBm
         # This function will set PA config with optimal setting for requested TX power
