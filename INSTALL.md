@@ -27,7 +27,12 @@ Enter following commands:<br/>
 cd RPi-LoRa-KISS-TNC-2ndgen
 git clone https://github.com/mayeranalytics/pySX127x.git
 ```
-Overwrite original /pySX127x/SX127x/board_config.py with /pySX127x/SX127x/board_config.py of my github.
+Overwrite original /pySX127x/SX127x/board_config.py with board_config.py of my github:
+```
+sudo mv board_config.py /pySX127x/SX127x/board_config.py
+
+```
+
 The original file is written for Modtronix Lora Module, which uses more GPIO lines than we need.
 In order to save resources of our raspberry, I deleted unused lines from board_config.py.
 Note that KISS TNC won't work if you don't overwrite board_config.py!!
