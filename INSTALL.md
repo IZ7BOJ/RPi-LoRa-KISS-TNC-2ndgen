@@ -2,7 +2,7 @@
 
 Note: the instructions consider aprx as APRS software, configured as internet rx-gateway. If you chose different aprs software, don't consider the aprx instructions
 
-## Install needed packages
+## Install needed base packages
 ```
 sudo apt install git aprx pip3 python3 python3-rpi.gpio python3-spidev python3-pil python3-smbus
 ```
@@ -11,21 +11,51 @@ sudo apt install git aprx pip3 python3 python3-rpi.gpio python3-spidev python3-p
 Enter following commands:<br/>
 ```
 cd /home/pi/Applications/ (this is only example, you can chose directory that you prefer)
-git clone https://github.com/tomelec/RPi-LoRa-KISS-TNC.git
+sudo git clone https://github.com/IZ7BOJ/RPi-LoRa-KISS-TNC-2ndgen.git
 ```
 
-## Install the SX126x python driver
+## Install the SX126x python driver (if sx126x is used)
 Enter following commands:<br/>
 ```
 pip3 install LoRaRF
 ```
 The complete installation instructions for the driver can be found here: https://github.com/chandrawi/LoRaRF-Python
 
+## Install the SX127x python driver (if sx127x is used)
+Enter following commands:<br/>
+```
+cd RPi-LoRa-KISS-TNC-2ndgen
+git clone https://github.com/mayeranalytics/pySX127x.git
+```
+Overwrite original /pySX127x/SX127x/board_config.py with /pySX127x/SX127x/board_config.py of my github.
+The original file is written for Modtronix Lora Module, which uses more GPIO lines than we need.
+In order to save resources of our raspberry, I deleted unused lines from board_config.py.
+Note that KISS TNC won't work if you don't overwrite board_config.py!!
+
+
+## Install Display driver (is display is used)
+```
+sudo pip3 install adafruit-circuitpython-ssd1306
+```
+Note: I2C bus musst be enabled on your raspberry! Follow these steps:
+```
+sudo raspi-config
+```
+Then "Interfacing Options"->"I2C", confirm "yes" at the end.
+For troubleshooting on the display, you can install "i2c-tools" and try to detect the display with "i2cdetect -y 1"
+
+## Enable SPI bus on raspberry
+```
+sudo raspi-config
+```
+Then "Interfacing Options"->"SPI", confirm "yes" at the end.
+
 ## RPi-KISS-TNC Configuration
 All the main parameters are enclosed in the file config.py .<br/>
 The comments in the file will help you to understand every parameter.<br/>
 If the log file is enabled, be sure to give the right permissions to the log file, otherwise the software will not start.<br/>
-
+Select the correct version of Lora chip (sx126x/127x)
+Enable display only if is connected, otherwise you'll get blocking error.
 
 ## Aprx Configuration
 Afterwards configure as following:
@@ -88,3 +118,5 @@ sudo Start_lora-tnc.py>/dev/null &
 ```
 sudo killall aprx Start_lora-tnc.py
 ```
+## Support
+For questions, write me at iz7boj [at] gmail.com
