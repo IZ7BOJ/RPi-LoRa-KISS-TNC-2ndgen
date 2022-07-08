@@ -47,7 +47,7 @@ def logf(message):
        fileLog = open(config.logpath,"a")
        fileLog.write(timestamp + message+"\n")
        fileLog.close()
-    print(timestamp + message+"\n")
+    print(timestamp + message)
 
 # Addresses must be 6 bytes plus the SSID byte, each character shifted left by 1
 # If it's the final address in the header, set the low bit to 1
@@ -59,6 +59,8 @@ def encode_address(s, final):
     if len(call) < 6:
         call = call + b" "*(6 - len(call)) # pad with spaces
     encoded_call = [x << 1 for x in call[0:6]]
+    if chr(ssid[-1])=="*": #OE5BPA digi adds "*"in the path and must be cut away
+       ssid=ssid[:-1]
     encoded_ssid = (int(ssid) << 1) | 0b01100000 | (0b00000001 if final else 0)
     return encoded_call + [encoded_ssid]
 
@@ -177,6 +179,9 @@ def encode_kiss_OE(frame,signalreport): #from Lora to Kiss, OE_Style
     logf("From: "+repr(src_addr)[2:-1]+" To: "+repr(dest_addr)[2:-1]+" Via: "+str(digis)[1:-1].replace("b","").replace("'","")+" Payload: "+repr(payload)[2:-1])
     packet += payload
     if config.appendSignalReport and str(dti) != DATA_TYPE_MESSAGE:
+        #some SW (es OE5BPA) append newline character at the end of packet. Must be cut for appending signal report
+        if chr(packet[-1])=="\n":
+          packet=packet[:-1]
         packet += b" "+str.encode(signalreport,'utf-8')
 
     # Escape the packet in case either KISS_FEND or KISS_FESC ended up in our stream
@@ -274,10 +279,10 @@ if __name__ == "__main__":
     print(decode_kiss_AX25(kissframe))
 
     #test encode OE->KISS
-    OE_frame = b"OE9TKH-8>APRS,digi-3,digi-2:!4725.51N/00939.86E[322/002/A=001306 Batt=3.99V"
+    OE_frame = b"OE9TKH-8>APRS,digi-3,digi-2:!4725.51N/00939.86E[322/002/A=001306 Batt=3.99V\n"
     signalreport="Level:-115dBm, SNR:0dB"
     print(encode_kiss_OE(OE_frame,signalreport))
 
     #test encode AX25->KISS
-    ax25_frame = b"\x82\xa0\xa4\xa6@@`\x9e\x8ar\xa8\x96\x90p\x88\x92\x8e\x92@@f\x88\x92\x8e\x92@@e\x03\xf0!4725.51N/00939.86E[322/002/A=001306 Batt=3.99V"
+    ax25_frame = b"\x82\xa0\xa4\xa6@@`\x9e\x8ar\xa8\x96\x90p\x88\x92\x8e\x92@@f\x88\x92\x8e\x92@@e\x03\xf0!4725.51N/00939.86E[322/002/A=001306 Batt=3.99V\n"
     print(encode_kiss_AX25(ax25_frame,signalreport))
