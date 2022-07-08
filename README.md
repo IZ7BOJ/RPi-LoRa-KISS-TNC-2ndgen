@@ -14,7 +14,7 @@ The Software keeps the compatibility with both standard AX25 packets and Austria
 ## Hardware compatibility
 
 The LoRa KISS TNC runs on Raspberry Pi 2 or newer together with the SX126x/SX127x LoRa Modules.
-128x64 SPI Display is supported for showing last rx/tx packets. Can be enabled/disabled inside config.py
+128x64 I2C Display (based os SSD1306chipset) is supported for showing last rx/tx packets. Can be enabled/disabled inside config.py
 
 Theoretically, all LoRa modules using SX127x (RFM9x) or SX126x series (SX1261, SX1262, SX1268) or LLCC68 will compatible. However, I personally tested the following configuration:
 * Raspberry Pi3
