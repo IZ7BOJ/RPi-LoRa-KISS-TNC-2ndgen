@@ -19,25 +19,25 @@
 from queue import Queue
 from TCPServer import KissServer
 import config
-from LoraAprsKissTnc import LoraAprsKissTnc
+if config.sx127x:
+   from LoraAprsKissTnc_sx127x import LoraAprsKissTnc
+else:
+   from LoraAprsKissTnc_sx126x import LoraAprsKissTnc
 
 print("########################\r")
-print("\033[95m#LORA KISS TNC STARTING#\033[0m\r")
+print("#LORA KISS TNC STARTING#\r")
 print("########################\r")
-print("\r")
-print("\033[1mCurrent LoRa init parameters:\033[0m\r")
-print("\033[94mfrequency=\033[0m",config.frequency)
-print("\033[94mpreamble=\033[0m",config.preamble)
-print("\033[94mspreadingFactor=\033[0m",config.spreadingFactor)
-print("\033[94mbandwidth=\033[0m",config.bandwidth)
-print("\033[94mcodingrate=\033[0m",config.codingrate)
-print("\033[94mappendSignalReport=\033[0m",config.appendSignalReport)
-print("\033[94moutputPower=\033[0m",config.outputPower)
-print("\033[94mTX_OE_Style=\033[0m",config.TX_OE_Style)
-print("\033[94msync_word=\033[0m",hex(config.sync_word))
-print("\033[94mRX_GAIN_POWER_SAVING=\033[0m",config.RX_GAIN_POWER_SAVING)
+print("#Lora parameters:\r")
+print("frequency=",config.frequency)
+print("preamble=",config.preamble)
+print("spreadingFactor=",config.spreadingFactor)
+print("bandwidth=",config.bandwidth)
+print("codingrate=",config.codingrate)
+print("APPEND_SIGNAL_REPORT=",config.appendSignalReport)
+print("outputPower=",config.outputPower)
+print("TX_OE_Style=",config.TX_OE_Style)
+print("sync_word=",hex(config.sync_word))
 print("########################\r")
-print("\r")
 
 # TX KISS frames go here (Digipeater -> TNC)
 kissQueue = Queue()
@@ -48,10 +48,14 @@ server = KissServer(kissQueue, config.TCP_HOST, config.TCP_PORT)
 server.setDaemon(True)
 server.start()
 
-# LoRa transceiver instance with all parameters
-lora = LoraAprsKissTnc(kissQueue, server, config.busId, config.csId, config.resetPin, config.busyPin, config.irqPin, config.txenPin, config.rxenPin,
+if config.sx127x:
+   # LoRa transceiver instance
+   lora = LoraAprsKissTnc(kissQueue, server, config.frequency, config.preamble, config.spreadingFactor, config.bandwidth, config.codingrate, config.appendSignalReport, 1, config.outputPower)
+else:
+   lora = LoraAprsKissTnc(kissQueue, server, config.busId, config.csId, config.resetPin, config.busyPin, config.irqPin, config.txenPin, config.rxenPin,
                        config.frequency, config.preamble, config.spreadingFactor, config.bandwidth, config.codingrate, config.appendSignalReport,
-                       config.outputPower, config.sync_word, config.payloadLength, config.crcType, config.RX_GAIN_POWER_SAVING)
+                       config.outputPower, config.sync_word, 80, True, config.RX_GAIN_POWER_SAVING)
+#print(lora)
 
 # this call loops forever inside
 lora.startListening()
