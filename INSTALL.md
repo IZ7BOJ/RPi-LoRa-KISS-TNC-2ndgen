@@ -32,8 +32,13 @@ Overwrite original /pySX127x/SX127x/board_config.py with board_config.py of my g
 sudo mv board_config.py /pySX127x/SX127x/board_config.py
 
 ```
+Overwrite original /pySX127x/SX127x/LoRa.py with LoRa.py of my github:
+```
+sudo mv LoRa.py /pySX127x/SX127x/LoRa.py
 
-The original file is written for Modtronix Lora Module, which uses more GPIO lines than we need.
+```
+
+The original files are written for Modtronix Lora Module, which uses more GPIO lines than we need.
 In order to save resources of our raspberry, I deleted unused lines from board_config.py.
 Note that KISS TNC won't work if you don't overwrite board_config.py!!
 
