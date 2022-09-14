@@ -160,7 +160,7 @@ class LoraAprsKissTnc(SX126x): #Inheritance of SX126x class
                             self.transmit(data)
                         except QueueEmpty:
                             pass
-                time.sleep(0.50)
+                time.sleep(3)
         except KeyboardInterrupt:
             logf("Keyboard Interrupt received. Exiting...")
             if config.disp_en:
