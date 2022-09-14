@@ -28,7 +28,7 @@ def logf(message):
        fileLog = open(config.logpath,"a")
        fileLog.write(timestamp + message+"\n")
        fileLog.close()
-    print(timestamp + message+"\n")
+    print(timestamp + message)
 
 client_address = []
 RECV_BUFFER_LENGTH = 1024
@@ -94,7 +94,7 @@ class KissServer(Thread):
                 traceback.print_tb(e.__traceback__)
                 encoded_data = None
         else:
-            logf("\033[94mNo OE_Style header found, trying standard AX25 decoding...\033[0m")
+            #logf("\033[94mNo OE_Style header found, trying standard AX25 decoding...\033[0m")
             try:
                 encoded_data = KissHelper.encode_kiss_AX25(data,signalreport)
             except Exception as e:
@@ -128,3 +128,4 @@ if __name__ == '__main__':
     server.send(b'<\xff\x01IZ7BOJ-12>APRS::OE1ACM-29: No GPS-Fix  Batt=0.00V {19','Level:-115dBm, SNR:0dB')
     data = KissQueue.get()
     print("Received KISS frame:" + repr(data))
+
