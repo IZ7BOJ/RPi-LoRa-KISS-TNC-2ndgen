@@ -41,9 +41,9 @@ preamble = 8 #valid preable lenght is 8/16/24/32
 spreadingFactor = 12 #valid spreading factor is between 5 and 12
 bandwidth = 125000 #possible BW values: 7800, 10400,15600, 20800, 31250, 41700, 62500, 125000, 250000, 500000
 codingrate = 5 #valid code rate denominator is between 5 and 8
-appendSignalReport = True #append signal report when packets are forwarded to aprs server
+appendSignalReport = False #NEVER CHANGE for Kiss TNC packet radio version
 outputPower = 17 #maximum TX power is 22(22dBm) for SX126x, and 15 (17dBm) for SX127x . Higher values will be forced to max allowed!
-TX_OE_Style = True #if True, tx RF packets are in OE Style, otherwise in standard AX25
+TX_OE_Style = False #NEVER CHANGE . Leave to standard AX25
 #sync_word = 0x1424 #sync word is x4y4. Es: 0x12 of 1st gen LoRa chip --> 0x1424 of 2nd gen LoRa chip
 sync_word = 0x12
 
