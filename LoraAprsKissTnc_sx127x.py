@@ -37,9 +37,9 @@ def logf(message):
     timestamp = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S - ')
     if config.log_enable:
        fileLog = open(config.logpath,"a")
-       fileLog.write(timestamp + message+"\n")
+       fileLog.write(timestamp + message+"\r")
        fileLog.close()
-    print(timestamp + message+"\n")
+    print(timestamp + message+"\r")
 
 def lcd(message):
        timestamp = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S - ')
@@ -145,7 +145,7 @@ class LoraAprsKissTnc(LoRa):
                         except QueueEmpty:
                             pass
 
-                time.sleep(0.50)
+                time.sleep(3.00)
         except KeyboardInterrupt:
             logf("Keyboard Interrupt received. Exiting...")
             if config.disp_en:
