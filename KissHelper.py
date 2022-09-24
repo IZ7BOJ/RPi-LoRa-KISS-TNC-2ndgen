@@ -49,19 +49,23 @@ def logf(message):
        fileLog.close()
     print(timestamp + message)
 
+# from LoRa OE_Style to KISS
 # Addresses must be 6 bytes plus the SSID byte, each character shifted left by 1
 # If it's the final address in the header, set the low bit to 1
+# If it has been digipeated, set the H bit to 1
 # Ignoring command/response for simple example
 def encode_address(s, final):
+    H=0b00000000 #default H bit low
+    if chr(s[-1])=='*': #example: WIDE1-1* or WIDE1*
+        s=s[:-1]
+        H=0b10000000
     if b"-" not in s:
         s = s + b"-0"  # default to SSID 0
     call, ssid = s.split(b'-')
     if len(call) < 6:
         call = call + b" "*(6 - len(call)) # pad with spaces
     encoded_call = [x << 1 for x in call[0:6]]
-    if chr(ssid[-1])=="*": #OE5BPA digi adds "*"in the path and must be cut away
-       ssid=ssid[:-1]
-    encoded_ssid = (int(ssid) << 1) | 0b01100000 | (0b00000001 if final else 0)
+    encoded_ssid = (int(ssid) << 1) | H | 0b01100000 | (0b00000001 if final else 0)
     return encoded_call + [encoded_ssid]
 
 
@@ -95,6 +99,8 @@ def ax25parser(frame): #extracts fields from ax25 frames and add signal report d
     rpt_list = b""
     while ext == 0:
         rpt_addr, rpt_hrr, ext = decode_address(frame, pos)
+        if rpt_hrr==b'111': # H bit high-->packet has been digipeated
+           rpt_addr+=b'*'
         rpt_list += b","+rpt_addr
         #print("RPT: ", rpt_addr)
         pos += 7
@@ -198,6 +204,7 @@ def encode_kiss_OE(frame,signalreport): #from Lora to Kiss, OE_Style
     kiss_cmd = 0x00  # Two nybbles combined - TNC 0, command 0 (send data)
     kiss_frame = [KISS_FEND, kiss_cmd] + packet_escaped + [KISS_FEND]
     try:
+        #print(bytearray(kiss_frame).hex())
         output = bytearray(kiss_frame)
     except ValueError:
         logf("Invalid value in frame.")
