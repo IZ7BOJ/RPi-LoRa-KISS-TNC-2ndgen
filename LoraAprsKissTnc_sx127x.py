@@ -151,6 +151,11 @@ class LoraAprsKissTnc(LoRa):
             if config.disp_en:
                lcd("Keyboard Interrupt received. Exiting...")
             BOARD.teardown()
+    def twos_comp(self,val, bits):
+        """compute the 2's complement of int value val"""
+        if (val & (1 << (bits - 1))) != 0: # if sign bit is set
+            val = val - (1 << bits)        # compute negative value
+        return val                         # else return positive value as is
 
     def on_rx_done(self):
         payload = self.read_payload(nocheck=True)
@@ -159,11 +164,12 @@ class LoraAprsKissTnc(LoRa):
             return
         rssi = self.get_pkt_rssi_value()
         snr = self.get_pkt_snr_value()
+        freq_err = self.twos_comp(self.get_fei(),20)*pow(2,24)/32e6*config.bandwidth/1000/500
         signalreport = "Level:"+str(rssi)+" dBm, SNR:"+str(snr)+"dB"
         data = bytes(payload)
-        logf("LoRa RX[%idBm/%.2fdB, %ibytes]: %s" %(rssi, snr, len(data), repr(data)))
+        logf("LoRa RX[%idBm/%.2fdB, %iHz ,%ibytes]: %s" %(rssi, snr, freq_err, len(data), repr(data)))
         if config.disp_en:
-           lcd("LoRa RX[RSSI=%idBm, SNR=%idB, %iBytes]: %s" %(rssi, snr, len(data), repr(data)))
+           lcd("LoRa RX[%idBm/%.2fdB, %iHz ,%ibytes]: %s" %(rssi, snr, freq_err, len(data), repr(data)))
 
         flags = self.get_irq_flags()
         if any([flags[s] for s in ['crc_error', 'rx_timeout']]):
