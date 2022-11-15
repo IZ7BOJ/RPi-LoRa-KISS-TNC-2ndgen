@@ -53,7 +53,7 @@ if config.sx127x:
    lora = LoraAprsKissTnc(kissQueue, server, config.frequency, config.preamble, config.spreadingFactor, config.bandwidth, config.codingrate, config.appendSignalReport, 1, config.outputPower)
 else:
    lora = LoraAprsKissTnc(kissQueue, server, config.busId, config.csId, config.resetPin, config.busyPin, config.irqPin, config.txenPin, config.rxenPin,
-                       config.frequency, config.preamble, config.spreadingFactor, config.bandwidth, config.codingrate, config.appendSignalReport,
+                       config.frequency, config.preamble, config.spreadingFactor, config.bandwidth, config.codingrate, config.crc, config.appendSignalReport,
                        config.outputPower, config.sync_word, 80, True, config.RX_GAIN_POWER_SAVING)
 #print(lora)
 
