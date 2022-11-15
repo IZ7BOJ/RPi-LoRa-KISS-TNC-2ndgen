@@ -58,7 +58,7 @@ class LoraAprsKissTnc(LoRa):
 
     # init has LoRa APRS default config settings - might be initialized different when creating object with parameters
     def __init__(self, queue, server, frequency=433775000, preamble=8, spreadingFactor=12, bandwidth=BW.BW125,
-                 codingrate=5, appendSignalReport = True, paSelect = 1, outputPower = 15, sync_word = 0x12, verbose=False):
+                 codingrate=5, crc = True, appendSignalReport = True, paSelect = 1, outputPower = 15, sync_word = 0x12, verbose=False):
     # Init SX127x
         if config.disp_en:
            image = Image.open(str(Path(__file__).parent.absolute())+"/LoRa-KISS-TNC_logo_64x128_raw.ppm").convert("1")
@@ -107,6 +107,8 @@ class LoraAprsKissTnc(LoRa):
         self.set_ocp_trim(100)
 
         self.set_sync_word(sync_word)
+      
+        self.set_rx_crc(crc)
 
         if outputPower>15 : outputPower=15
         self.set_pa_config(paSelect, 7, outputPower)
