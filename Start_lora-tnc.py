@@ -37,6 +37,7 @@ print("APPEND_SIGNAL_REPORT=",config.appendSignalReport)
 print("outputPower=",config.outputPower)
 print("TX_OE_Style=",config.TX_OE_Style)
 print("sync_word=",hex(config.sync_word))
+print("crc=",config.crc)
 print("########################\r")
 
 # TX KISS frames go here (Digipeater -> TNC)
@@ -50,11 +51,11 @@ server.start()
 
 if config.sx127x:
    # LoRa transceiver instance
-   lora = LoraAprsKissTnc(kissQueue, server, config.frequency, config.preamble, config.spreadingFactor, config.bandwidth, config.codingrate, config.appendSignalReport, 1, config.outputPower)
+   lora = LoraAprsKissTnc(kissQueue, server, config.frequency, config.preamble, config.spreadingFactor, config.bandwidth, config.codingrate, config.crc, config.appendSignalReport, 1, config.outputPower)
 else:
    lora = LoraAprsKissTnc(kissQueue, server, config.busId, config.csId, config.resetPin, config.busyPin, config.irqPin, config.txenPin, config.rxenPin,
-                       config.frequency, config.preamble, config.spreadingFactor, config.bandwidth, config.codingrate, config.crc, config.appendSignalReport,
-                       config.outputPower, config.sync_word, 80, True, config.RX_GAIN_POWER_SAVING)
+                       config.frequency, config.preamble, config.spreadingFactor, config.bandwidth, config.codingrate, config.appendSignalReport,
+                       config.outputPower, config.sync_word, 80, config.crc, config.RX_GAIN_POWER_SAVING)
 #print(lora)
 
 # this call loops forever inside
