@@ -51,7 +51,7 @@ server.start()
 
 if config.sx127x:
    # LoRa transceiver instance
-   lora = LoraAprsKissTnc(kissQueue, server, config.frequency, config.preamble, config.spreadingFactor, config.bandwidth, config.codingrate, config.crc, config.appendSignalReport, 1, config.outputPower)
+   lora = LoraAprsKissTnc(kissQueue, server, config.frequency, config.preamble, config.spreadingFactor, config.bandwidth, config.codingrate, config.crc, config.appendSignalReport, 1, config.outputPower, config.sync_word)
 else:
    lora = LoraAprsKissTnc(kissQueue, server, config.busId, config.csId, config.resetPin, config.busyPin, config.irqPin, config.txenPin, config.rxenPin,
                        config.frequency, config.preamble, config.spreadingFactor, config.bandwidth, config.codingrate, config.appendSignalReport,
