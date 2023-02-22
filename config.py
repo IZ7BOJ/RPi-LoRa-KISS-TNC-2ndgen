@@ -32,8 +32,13 @@ irqPin = 5 #DIO0 of sx127x and DIO1 of sx126x, used for IRQ in rx
 # Settings valid only for SX126x. Default pin assignment refers to the PCB schematic /doc/LoRa_RPi_Companion_2022.pdf
 resetPin = 6
 busyPin = 4
+# If txen and rxen are disabled (=-1), then DIO2 will be set as RF Switch control
 txenPin = 0 #In Ebyte modules, it's used for switching on the tx pa.
 rxenPin = 1 #In Ebyte modules, it's used for switching on the rx lna
+
+# If Lora module has a TCXO, the following parameter must be True
+# If True, the DIO3 line will be set as control voltage of the TCXO
+tcxo=False
 
 ## LoRa Settings valid for both SX127x and SX126x modules
 frequency = 433775000 #frequency in Hz
