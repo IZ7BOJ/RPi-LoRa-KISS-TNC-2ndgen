@@ -1,4 +1,4 @@
-82#!/usr/bin/python
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 # This program is free software: you can redistribute it and/or modify
@@ -77,7 +77,12 @@ class LoraAprsKissTnc(SX126x): #Inheritance of SX126x class
               lcd("LoRa radio initialized")
 
         # Configure LoRa to use TCXO with DIO3 as control
-        self.setDio3TcxoCtrl(self.DIO3_OUTPUT_1_8, self.TCXO_DELAY_10)
+        if config.tcxo==True:
+            self.setDio3TcxoCtrl(self.DIO3_OUTPUT_1_8, self.TCXO_DELAY_10)
+            
+        #Configure DIO2 as RF Switch if rxen and txen are not used
+        if (config.rxenPin==-1 and config.txenPin==-1):
+            self.setDio2RfSwitch(True)
 
         # Configure Frequency
         self.setFrequency(frequency)
