@@ -113,6 +113,17 @@ class LoraAprsKissTnc(SX126x): #Inheritance of SX126x class
 
         self.onReceive(self.callback) #callback function called after rx interrupt activation
         self.request(self.RX_CONTINUOUS) #Set receiver in continuous rx mode
+     
+    #Frequency offset register is not documented on Semtech datasheets.
+    #This function is inspred from Radiolib (https://github.com/jgromes/RadioLib/blob/master/src/modules/SX126x.cpp)
+    def getFreqError(self)  :
+        state = self.readRegister(0x076B, 3)
+        efe = (state[0]<<16 | state[1]<<8 | state[2]) & 0x0FFFFF
+        #check the first bit
+        if (efe & 0x80000) :
+           efe = efe - (1<<20) #compute negative value
+        error = 1.55 * efe / (1600 / (config.bandwidth/1000))
+        return error
 
     def callback(self) :
 
@@ -126,10 +137,11 @@ class LoraAprsKissTnc(SX126x): #Inheritance of SX126x class
             return
       rssi = self.packetRssi()
       snr = self.snr()
+      freq_err=self.getFreqError()
       signalreport = "Level:"+str(rssi)+" dBm, SNR:"+str(snr)+"dB"
-      logf("LoRa RX[RSSI=%idBm, SNR=%.2fdB, %iBytes]: %s" %(rssi, snr, len(payload), repr(payload)))
+      logf("LoRa RX[RSSI=%idBm, SNR=%.2fdB, %iBytes, Freq.Offset: %iHz]: %s" %(rssi, snr, len(payload), freq_err, repr(payload)))
       if config.disp_en:
-         lcd("LoRa RX[RSSI=%idBm, SNR=%idB, %iBytes]: %s" %(rssi, snr, len(payload), repr(payload)))
+         lcd("LoRa RX[RSSI=%idBm, SNR=%.2fdB, %iBytes, Freq.Offset: %iHz]: %s" %(rssi, snr, len(payload), freq_err, repr(payload)))
 
       # Show received status in case CRC or header error occur
       status = self.status()
