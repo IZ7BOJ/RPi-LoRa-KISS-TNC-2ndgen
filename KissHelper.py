@@ -133,7 +133,7 @@ def encode_kiss_AX25(frame,signalreport): #from Lora to Kiss, Standard AX25
     src_addr,dest_addr,rpt_list,payload,dti=ax25parser(frame) #only for logging
 
     # Escape the packet in case either KISS_FEND or KISS_FESC ended up in our stream
-    if config.appendSignalReport and str(dti) != DATA_TYPE_MESSAGE:
+    if config.appendSignalReport and dti != DATA_TYPE_MESSAGE:
         frame += b" "+str.encode(signalreport,'utf-8')
 
     packet_escaped = []
@@ -184,7 +184,7 @@ def encode_kiss_OE(frame,signalreport): #from Lora to Kiss, OE_Style
     logf("Extracted AX25 parameters from OE LoRa Frame")
     logf("From: "+repr(src_addr)[2:-1]+" To: "+repr(dest_addr)[2:-1]+" Via: "+str(digis)[1:-1].replace("b","").replace("'","")+" Payload: "+repr(payload)[2:-1])
     packet += payload
-    if config.appendSignalReport and str(dti) != DATA_TYPE_MESSAGE:
+    if config.appendSignalReport and dti != DATA_TYPE_MESSAGE:
         #some SW (es OE5BPA) append newline character at the end of packet. Must be cut for appending signal report
         if chr(packet[-1])=="\n":
           packet=packet[:-1]
