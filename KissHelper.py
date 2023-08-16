@@ -122,7 +122,7 @@ def ax25parser(frame): #extracts fields from ax25 frames and add signal report d
         logf("IFRAME")
         return None
     payload=frame[pos:]
-    dti=payload[0]
+    dti=bytes(chr(payload[0]),'utf-8')
     logf("Extracted AX25 parameters from AX25 Frame")
     logf("From: "+repr(src_addr)[2:-1]+" To: "+repr(dest_addr)[2:-1]+" Via: "+repr(rpt_list)[3:-1]+" PID: "+str(hex(pid))+" Payload: "+str(payload)[str(payload).find("'"):-1])
 
@@ -163,7 +163,7 @@ def encode_kiss_OE(frame,signalreport): #from Lora to Kiss, OE_Style
         return None
     path = frame.split(b":")[0]
     payload = frame[frame.find(b":")+1:]
-    dti = payload[0]
+    dti = bytes(chr(payload[0]),'utf-8')
     src_addr = path.split(b">")[0]
     digis = path[path.find(b">") + 1:].split(b",")
     dest_addr = digis.pop(0)
