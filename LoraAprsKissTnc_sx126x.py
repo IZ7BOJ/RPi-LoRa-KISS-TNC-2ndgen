@@ -93,9 +93,22 @@ class LoraAprsKissTnc(SX126x): #Inheritance of SX126x class
         else:
           self.setRxGain(self.RX_GAIN_BOOSTED)
 
+        # Set Low Data Rate Optimization starting from configured SF and BW.
+        # Datasheet requires that it must be used when the symbol duration exceeds 16ms. This is the case below:
+        # - SF=12 and 11 in 125 kHz.
+        # - SF=12 in 250 kHz.
+        if config.ldro=="": #ldro auto
+            if (sf==12 and (bw==125000 or bw==250000))or(sf==11 and bw==125000): #symbol duration >16ms
+                ldro=True
+            else:
+                ldro=False
+        elif config.ldro != False or config.ldro != True: # if wrong values
+            ldro = True #assign default value
+        else:
+            ldro = config.ldro #manual assignment from config.py                                                                            
         # Configure modulation parameter including spreading factor (SF), bandwidth (BW), and coding rate (CR)
         # Receiver must have same SF and BW setting with transmitter to be able to receive LoRa packet
-        self.setLoRaModulation(sf, bw, cr, True) #final True is LDRO, must be set
+        self.setLoRaModulation(sf, bw, cr, ldro)
 
         # Configure packet parameter including header type, preamble length, payload length, and CRC type
         # The explicit packet includes header contain CR, number of byte, and CRC type
