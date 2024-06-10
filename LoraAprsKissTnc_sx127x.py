@@ -58,7 +58,7 @@ class LoraAprsKissTnc(LoRa):
 
     # init has LoRa APRS default config settings - might be initialized different when creating object with parameters
     def __init__(self, queue, server, frequency=433775000, preamble=8, spreadingFactor=12, bandwidth=BW.BW125,
-                 codingrate=5, crc = True, appendSignalReport = True, paSelect = 1, outputPower = 15, sync_word = 0x12, verbose=False):
+                 codingrate=5, crc = True, appendSignalReport = True, paSelect = 1, outputPower = 15, sync_word = 0x12, ldro=True, verbose=False):
     # Init SX127x
         if config.disp_en:
            image = Image.open(str(Path(__file__).parent.absolute())+"/LoRa-KISS-TNC_logo_64x128_raw.ppm").convert("1")
@@ -95,7 +95,20 @@ class LoraAprsKissTnc(LoRa):
         }
 
         self.set_bw(bw[bandwidth])
-        self.set_low_data_rate_optim(True)
+
+	# Set Low Data Rate Optimization starting from configured SF and BW.
+        # Datasheet requires that it must be used when the symbol duration exceeds 16ms. This is the case below:
+        # - SF=12 and 11 in 125 kHz.
+        # - SF=12 in 250 kHz.
+        if config.ldro=="": #ldro auto
+            if (spreadingFactor==12 and (bandwidth==125000 or bandwidth==250000))or(spreadingFactor==11 and bandwidth==125000): #symbol duration >16ms
+                ldro=True
+            else:
+                ldro=False
+        else:
+            ldro = config.ldro #manual assignment from config.py
+
+        self.set_low_data_rate_optim(ldro)
 
         CR = {
         5 : CODING_RATE.CR4_5,
@@ -207,3 +220,4 @@ class LoraAprsKissTnc(LoRa):
             return lora_aprs_frame[delimiter_position + 1]
         except IndexError:
             return ""
+            
