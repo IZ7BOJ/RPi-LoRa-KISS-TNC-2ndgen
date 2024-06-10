@@ -52,6 +52,6 @@ TX_OE_Style = True #if True, tx RF packets are in OE Style, otherwise in standar
 #sync_word = 0x1424 #sync word is x4y4. Es: 0x12 of 1st gen LoRa chip --> 0x1424 of 2nd gen LoRa chip
 sync_word = 0x12
 crc = True #defines if CRC is calculated and transmitted in the header. Note that modem works in explicit mode
-
+ldro = "" #LowDataRateOptimization. If left blank, Software will configure it considering actual SF and BW. Otherwiswe you can force it with "True" or "False"
 #LoRa Settings valid only for SX126x
 RX_GAIN_POWER_SAVING = False #If false, receiver is set in boosted gain mode (needs more power)
