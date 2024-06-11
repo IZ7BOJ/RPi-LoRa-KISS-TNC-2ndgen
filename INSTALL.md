@@ -29,7 +29,7 @@ git clone https://github.com/mayeranalytics/pySX127x.git
 ```
 Overwrite original /pySX127x/SX127x/board_config.py with board_config.py of my github:
 ```
-sudo mv board_config.py /pySX127x/SX127x/board_config.py
+sudo mv board_config.py ./pySX127x/SX127x/board_config.py
 
 ```
 Overwrite original /pySX127x/SX127x/LoRa.py with LoRa.py of my github:
