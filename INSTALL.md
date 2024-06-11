@@ -42,7 +42,6 @@ The original files are written for Modtronix Lora Module, which uses more GPIO l
 In order to save resources of our raspberry, I deleted unused lines from board_config.py.
 Note that KISS TNC won't work if you don't overwrite board_config.py!!
 
-
 ## Install Display driver (is display is used)
 ```
 sudo pip3 install adafruit-circuitpython-ssd1306
@@ -128,5 +127,15 @@ sudo Start_lora-tnc.py>/dev/null &
 ```
 sudo killall aprx Start_lora-tnc.py
 ```
+
+## "Note for Bookwarm OS!
+The Rpi.GPIO library is not supported by Bookwarm distro and must be replaced by lgpio
+```
+sudo apt remove python3-rpi.gpio
+sudo apt install python3-rpi.lgpio
+```
+Moreover, the command "pip3 install LoRaRF" won't work.
+To install the LoRaRF Library, follow author's procedure: https://github.com/chandrawi/LoRaRF-Python?tab=readme-ov-file#if-you-run-into-problems-installing-the-package-another-option-is-creating-a-virtual-environment 
+
 ## Support
 For questions, write me at iz7boj [at] gmail.com
