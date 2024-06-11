@@ -23,7 +23,8 @@ sys.path.insert(0, './pySX127x/')
 from pySX127x.SX127x.LoRa import LoRa
 from pySX127x.SX127x.constants import *
 from pySX127x.SX127x.board_config import BOARD
-from display import display
+if config.disp_en:
+   from display import display
 from PIL import Image
 from pathlib import Path
 
