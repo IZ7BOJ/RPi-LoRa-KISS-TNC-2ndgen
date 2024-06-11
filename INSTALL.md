@@ -34,7 +34,7 @@ sudo mv board_config.py ./pySX127x/SX127x/board_config.py
 ```
 Overwrite original /pySX127x/SX127x/LoRa.py with LoRa.py of my github:
 ```
-sudo mv LoRa.py /pySX127x/SX127x/LoRa.py
+sudo mv LoRa.py ./pySX127x/SX127x/LoRa.py
 
 ```
 
