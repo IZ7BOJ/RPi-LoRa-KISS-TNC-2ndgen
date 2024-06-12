@@ -57,7 +57,7 @@ class LoraAprsKissTnc(SX126x): #Inheritance of SX126x class
     # init has LoRa APRS default config settings - might be initialized different when creating object with parameters
     def __init__(self, queue, server, busId=0, csId=0, resetPin=22, busyPin=23, irqPin=26, txenPin=-1, rxenPin=-1,
                 frequency=433775000, preamble=8, sf=12, bw=125000, cr=5, appendSignalReport=True, outputPower=22,
-                sync_word=0x1424, payloadLength=50, crcType=False, gain=False):
+                sync_word=0x1424, payloadLength=50, crcType=False, gain=False, ldro=True):
 
         if config.disp_en:
            image = Image.open(str(Path(__file__).parent.absolute())+"/LoRa-KISS-TNC_logo_64x128_raw.ppm").convert("1")
