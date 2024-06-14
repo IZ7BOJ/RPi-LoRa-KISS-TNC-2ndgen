@@ -14,13 +14,6 @@ cd /home/pi/Applications/ (this is only example, you can chose directory that yo
 sudo git clone https://github.com/IZ7BOJ/RPi-LoRa-KISS-TNC-2ndgen.git
 ```
 
-## Install the SX126x python driver (if sx126x is used)
-Enter following commands:<br/>
-```
-pip3 install LoRaRF
-```
-The complete installation instructions for the driver can be found here: https://github.com/chandrawi/LoRaRF-Python
-
 ## Install the SX127x python driver (if sx127x is used)
 Enter following commands:<br/>
 ```
@@ -128,14 +121,14 @@ sudo Start_lora-tnc.py>/dev/null &
 sudo killall aprx Start_lora-tnc.py
 ```
 
-## "Note for Bookwarm OS!
+## Note for Bookwarm OS!
 The Rpi.GPIO library is not supported by Bookwarm distro and must be replaced by lgpio
 ```
 sudo apt remove python3-rpi.gpio
 sudo apt install python3-rpi.lgpio
 ```
-Moreover, the command "pip3 install LoRaRF" won't work.
-To install the LoRaRF Library, follow author's procedure: https://github.com/chandrawi/LoRaRF-Python?tab=readme-ov-file#if-you-run-into-problems-installing-the-package-another-option-is-creating-a-virtual-environment 
+Moreover, pip3 won't work and can't be used for display driver installation.
+A virtual environment must be created as described in https://docs.circuitpython.org/projects/ssd1306/en/latest/
 
 ## Support
 For questions, write me at iz7boj [at] gmail.com
