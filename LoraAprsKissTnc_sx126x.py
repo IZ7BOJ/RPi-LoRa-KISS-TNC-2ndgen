@@ -23,8 +23,9 @@ from asyncio import QueueEmpty
 import traceback
 currentdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.dirname(os.path.dirname(currentdir)))
-from LoRaRF import SX126x
-from display import display
+from SX126x import SX126x
+if config.disp_en:
+   from display import display
 from PIL import Image
 from pathlib import Path
 
