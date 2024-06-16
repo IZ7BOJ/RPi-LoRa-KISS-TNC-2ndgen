@@ -121,11 +121,11 @@ sudo Start_lora-tnc.py>/dev/null &
 sudo killall aprx Start_lora-tnc.py
 ```
 
-## Note for Bookwarm OS!
-The Rpi.GPIO library is not supported by Bookwarm distro and must be replaced by lgpio
+## Note for Bookworm OS!
+The Rpi.GPIO library is not supported by Bookworm distro and must be replaced by lgpio
 ```
 sudo apt remove python3-rpi.gpio
-sudo apt install python3-rpi.lgpio
+sudo apt install python3-rpi-lgpio
 ```
 Moreover, pip3 won't work and can't be used for display driver installation.
 A virtual environment must be created as described in https://docs.circuitpython.org/projects/ssd1306/en/latest/
